@@ -1,0 +1,4 @@
+.env
+env/
+article-pod-service-account.json
+AWSCLIV2.pkg
