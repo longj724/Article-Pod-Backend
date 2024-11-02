@@ -124,7 +124,7 @@ async def create_article(article: ArticleCreate, db: db_dependency):
             detail=f"An error occurred while processing the article: {str(e)}"
         )
 
-@router.delete("/{article_id}", status_code=204)
+@router.delete("/{article_id}")
 async def delete_article(article_id: str, db: db_dependency):
     article = db.query(Article).filter(Article.id == article_id).first()
     if not article:
@@ -132,5 +132,5 @@ async def delete_article(article_id: str, db: db_dependency):
     
     db.delete(article)
     db.commit()
-    return
+    return article
 
