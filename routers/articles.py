@@ -8,6 +8,7 @@ from google.oauth2 import service_account
 import os
 import tempfile
 from uuid import uuid4, UUID
+from fastapi.responses import Response
 
 from api.models import Article
 from api.deps import db_dependency
@@ -28,6 +29,10 @@ class ArticleResponse(BaseModel):
     content_url: str | None
     audio_url: str
     speech_model: str
+
+class TestVoiceRequest(BaseModel):
+    voice: str
+    text: str
 
 router = APIRouter(
     prefix='/articles',
@@ -133,4 +138,37 @@ async def delete_article(article_id: str, db: db_dependency):
     db.delete(article)
     db.commit()
     return article
+
+@router.post("/test-voice")
+async def test_voice(request: TestVoiceRequest):
+    try:
+        client = texttospeech.TextToSpeechClient(credentials=credentials)
+
+        synthesis_input = texttospeech.SynthesisInput(text=request.text)
+
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="en-US",
+            name=request.voice
+        )
+
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3
+        )
+
+        response = client.synthesize_speech(
+            input=synthesis_input,
+            voice=voice,
+            audio_config=audio_config
+        )
+
+        
+        return Response(
+            content=response.audio_content,
+            media_type="audio/mpeg"
+        )
+    except Exception as e:
+        return Response(
+            status_code=500,
+            content=str(e)
+        )
 
