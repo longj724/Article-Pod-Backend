@@ -2,3 +2,5 @@
 env/
 article-pod-service-account.json
 AWSCLIV2.pkg
+routers/__pycache__
+services/__pycache__

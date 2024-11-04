@@ -13,6 +13,7 @@ from fastapi.responses import Response
 from api.models import Article
 from api.deps import db_dependency
 from api.services.s3_service import S3Service
+from api.services.rss_service import RSSService
 
 credentials = service_account.Credentials.from_service_account_file(
     'article-pod-service-account.json'
@@ -115,6 +116,10 @@ async def create_article(article: ArticleCreate, db: db_dependency):
         db.add(db_article)
         db.commit()
         db.refresh(db_article)
+        
+        rss_service = RSSService()
+        rss_service.add_article_to_feed(db_article)
+        
         return db_article
         
     except ArticleException as e:
